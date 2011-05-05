@@ -1,0 +1,5 @@
+; $Id$
+name = Build calculator 
+description = A block module that Calculat the building prize based on build type and square meter 
+package = Byggaktuelt
+core = 6.x

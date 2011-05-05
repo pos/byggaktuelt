@@ -1,0 +1,30 @@
+--- ckeditor.config.js.old      2010-08-17 14:25:22.000000000 -0400
++++ ckeditor.config.js  2010-08-17 14:25:52.000000000 -0400
+@@ -40,7 +40,7 @@ CKEDITOR.editorConfig = function(config)
+     ['Source'],
+     ['Cut','Copy','Paste','PasteText','PasteFromWord','-','SpellChecker', 'Scayt'],
+     ['Undo','Redo','Find','Replace','-','SelectAll','RemoveFormat'],
+-    ['Image','Flash','Table','HorizontalRule','Smiley','SpecialChar'],
++    ['Image','NodeEmbed','Flash','Table','HorizontalRule','Smiley','SpecialChar'],
+     ['Maximize', 'ShowBlocks'],
+     '/',
+     ['Format'],
+@@ -67,7 +67,7 @@ CKEDITOR.editorConfig = function(config)
+       ['Source'],
+       ['Cut','Copy','Paste','PasteText','PasteFromWord','-','SpellChecker', 'Scayt'],
+       ['Undo','Redo','Find','Replace','-','SelectAll','RemoveFormat'],
+-      ['Image','Flash','Table','HorizontalRule','Smiley','SpecialChar'],
++      ['Image','NodeEmbed','Flash','Table','HorizontalRule','Smiley','SpecialChar'],
+       '/',
+       ['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],
+       ['NumberedList','BulletedList','-','Outdent','Indent','Blockquote'],
+@@ -131,4 +131,8 @@ CKEDITOR.editorConfig = function(config)
+   // 'IMCE' plugin. If IMCE module is enabled, you may uncomment lines below and add an 'IMCE' button to selected toolbar.
+   //config.extraPlugins += (config.extraPlugins ? ',imce' : 'imce' );
+   //CKEDITOR.plugins.addExternal('imce', Drupal.settings.ckeditor.module_path + '/plugins/imce/');
++
++  // 'NodeEmbed' plugin.
++  config.extraPlugins += (config.extraPlugins ? ',NodeEmbed' : 'NodeEmbed' );
++  CKEDITOR.plugins.addExternal('NodeEmbed', Drupal.settings.ckeditor.module_path+'/plugins/nodeembed/');
+ };
+\ No newline at end of file

@@ -1,0 +1,12 @@
+; $Id: op_author_panels.info,v 1.1.2.1 2010/01/15 19:26:44 inadarei Exp $
+name = OP Author Panels
+description = Panels of OP Authors Feature
+dependencies[] = page_manager
+package = Features
+core = 6.x
+; Information added by drupal.org packaging script on 2010-08-19
+version = "6.x-1.16"
+core = "6.x"
+project = "openpublish_features"
+datestamp = "1282257692"
+

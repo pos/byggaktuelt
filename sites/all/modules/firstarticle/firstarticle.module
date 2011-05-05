@@ -1,0 +1,222 @@
+<?php
+
+// $Id$
+/**
+ * Display help and module information
+ * @param path which path of the site we're displaying help
+ * @param arg array that holds the current path as would be returned from arg() function
+ * @return help text for the path
+ */
+function firstarticle_help($path, $arg) {
+    $output = '';  //declare your output variable
+    switch ($path) {
+        case "admin/help#firstarticle":
+            $output = '<p>' . t("Displays links to nodes created on this date") . '</p>';
+            break;
+    }
+    return $output;
+}
+
+// function onthisdate_help
+
+function firstarticle_theme() {
+    return array(
+        'forums' => array(
+            'template' => 'firstarticle',
+            'arguments' => array('node' => NULL),
+    ));
+}
+
+/**
+ * Valid permissions for this module
+ * @return array An array of valid permissions for the onthisdate module
+ */
+function firstarticle_perm() {
+    return array('access firstarticle content');
+}
+
+// function onthisdate_perm()
+
+/**
+ * Implementation of hook_block
+ * @param string $op one of "list", "view", "save" and "configure"
+ * @param integer $delta code to identify the block
+ * @param array $edit only for "save" operation
+ * */
+function firstarticle_block($op = 'list', $delta = 0, $edit = array()) {
+    if ($op == "list") {
+        // Generate listing of blocks from this module, for the admin/block page
+        $block = array();
+        $block[0]["info"] = t('first article');
+        return $block;
+    } else if ($op == 'view') {
+
+        // Generate our block content
+
+        $result = firstarticle_get_nodes();
+        $first = false;
+        $antal = 0;
+        foreach ($result as $node) {
+
+            $replace = array('<b>', '</b>', '<p>', '</p>');
+            $teaser = ($node->field_teaser[0]['value']) ? $node->field_teaser[0]['value'] : $node->field_ingress[0]['value'];
+
+            if (empty($teaser)) {
+                $teaser = substr(strip_tags($node->body), 0, 90);
+            }
+
+            $ingress = strip_tags( str_replace($replace, '', $teaser) );
+
+            if ($node->field_main_image[0]['filepath'] != null) {
+                $block_content = '<a href="' . url('node/' . $node->nid) . '" title="' . check_plain($node->title) . '">' . theme('imagecache', 'Main_article', $node->field_main_image[0]['filepath'], '', $ingress) . '</a>';
+            }
+            $block_content .= '<h3 style="font-size:1.4em;"><a href="' . url('node/' . $node->nid) . '" title="' . check_plain($node->title) . '">' . check_plain($node->title) . '</a></h3>';
+            $block_content .= $ingress;
+            $block_content .='<br /> <a href="' . url('node/' . $node->nid) . '" title="' . check_plain($node->title) . '"> Les mer...</a>';
+            $block_content .= '<div class="linebreak"> Publisert: ' . date('Y-m-d', $node->created) . ' </div>';
+        }
+        //  the block view
+        if ($block_content == '') {
+            // no content from a week ago
+            $block['subject'] = 'Sorry No Contents';
+            $block['content'] = 'Sorry No Content';
+            return $block;
+        }
+        // set up the block
+        $block['subject'] = 'first article';
+        $block['content'] = $block_content;
+        return $block;
+    }
+}
+
+/*
+ * Get the correct node based on current url 
+ * ex if it is  $path_pieces[0] == frontpage
+ * get all article else is it based in taxonomy
+ */
+
+function firstarticle_get_nodes() {
+
+    $path_pieces = explode('/', drupal_get_path_alias($_GET['q']));
+    $resultArray = array();
+    if ($path_pieces[0] == 'frontpage') {
+        $result = db_query_range('SELECT n.nid, n.created
+                                    FROM {node} n
+                                    WHERE n.status = 1
+                                    AND n.type="article"
+                                    AND n.promote <> 0
+                                    ORDER BY n.created DESC', 'article', 0, 1);
+
+        while ($row = db_fetch_object($result)) {
+            $node = node_load(array("nid" => $row->nid));
+            array_push($resultArray, $node);
+        }
+    } else {
+
+        switch ($path_pieces[0]) {
+            case 'Bil':
+                $result = taxonomy_select_nodes(array(29), 'or', 0, FALSE);
+                ;
+                break;
+
+            case 'Bransjenytt':
+                $result = taxonomy_select_nodes(array(30), 'or', 0, FALSE);
+                ;
+                break;
+
+            case 'Kostnader-Trender':
+                $result = taxonomy_select_nodes(array(31), 'or');
+                ;
+                break;
+
+            case 'Produktnyheter':
+                $result = taxonomy_select_nodes(array(32), 'or');
+                ;
+                break;
+
+            case 'Prosjektfakta':
+                $result = taxonomy_select_nodes(array(33), 'or');
+                ;
+                break;
+            case 'boligbygg':
+                $result = taxonomy_select_nodes(array(37), 'or');
+                ;
+                break;
+            case 'naeringsbygg':
+                $result = taxonomy_select_nodes(array(38), 'or');
+                ;
+                break;
+            case 'anlegg':
+                $result = taxonomy_select_nodes(array(39), 'or');
+                ;
+                break;
+            case 'gronn-sone':
+                $result = taxonomy_select_nodes(array(40), 'or');
+                ;
+                break;
+
+            default:
+                $result = taxonomy_select_nodes(array(29, 30, 31, 32, 33, 35, 37, 38, 39, 40), 'or');
+                ;
+                ;
+                break;
+        }
+        $counter = 0; // must add this becouse there do not exist any limit in D6 for taxonomy_select_nodes
+        while ($row = db_fetch_object($result)) {
+            if ($counter == 0) {
+                $node = node_load(array("nid" => $row->nid));
+                array_push($resultArray, $node);
+            }
+
+            $counter++;
+        }
+    }
+
+    return $resultArray;
+}
+
+function firstarticle_admin() {
+    $form = array();
+
+    $form['firstarticle_maxdisp'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Maximum number of links'),
+        '#default_value' => variable_get('firstarticle_maxdisp', 3),
+        '#size' => 2,
+        '#maxlength' => 2,
+        '#description' => t("The maximum number of links to display in the block."),
+        '#required' => TRUE,
+    );
+
+    return system_settings_form($form);
+}
+
+function firstarticle_admin_validate($form, &$form_state) {
+    $maxdisp = $form_state['values']['firstarticle_maxdisp'];
+    if (!is_numeric($maxdisp)) {
+        form_set_error('firstarticle_maxdisp', t('You must enter an integer for the maximum number of links.'));
+    } else if ($maxdisp <= 0) {
+        form_set_error('firstarticle_maxdisp', t('Maximum number of links must be positive.'));
+    }
+}
+
+function firstarticle_menu() {
+
+    $items = array();
+
+    $items['admin/settings/firstarticle'] = array(
+        'title' => 'first article module settings',
+        'description' => 'Description of your On this date settings page',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('firstarticle_admin'),
+        'access arguments' => array('access administration pages'),
+        'type' => MENU_NORMAL_ITEM,
+    );
+
+    return $items;
+}
+
+function template_preprocess_firstarticle(&$node) {
+
+}
+

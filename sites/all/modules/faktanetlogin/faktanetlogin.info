@@ -1,0 +1,5 @@
+; $Id$
+name = FaktaNet login
+description = A block module that that login to FaktaNet login 
+package = Byggaktuelt
+core = 6.x

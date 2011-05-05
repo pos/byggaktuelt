@@ -1,0 +1,30 @@
+<?php
+// $Id: twitter_pull.install,v 1.1.2.1 2010/04/02 17:01:56 detour Exp $
+
+/**
+ * @file
+ * Installation routines for the Twitter Pull module.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function twitter_pull_install() {
+  drupal_install_schema('twitter_pull');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function twitter_pull_uninstall() {
+  drupal_uninstall_schema('twitter_pull');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function twitter_pull_schema() {
+  $schema['cache_pulled_tweets'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_pulled_tweets']['description'] = 'Cache table for the tweets pulled by Twitter Pull module';
+  return $schema;
+}

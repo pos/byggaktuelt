@@ -1,0 +1,20 @@
+--- admin.install.orig	2009-10-21 21:44:45.874585000 -0400
++++ admin.install	2009-10-21 21:45:34.067089000 -0400
+@@ -12,7 +12,7 @@ function admin_install() {
+  * Implementation of hook_enable().
+  */
+ function admin_enable() {
+-  $result = db_query("SELECT * FROM {menu_links} WHERE link_path LIKE 'admin%'");
++  $result = db_query("SELECT * FROM {menu_links} WHERE link_path = 'admin' OR link_path LIKE 'admin/%'");
+   while ($item = db_fetch_array($result)) {
+     _menu_delete_item($item, TRUE);
+   }
+@@ -42,7 +42,7 @@ function admin_update_6002() {
+     variable_set('admin_theme', 'slate');
+   }
+ 
+-  $result = db_query("SELECT * FROM {menu_links} WHERE link_path LIKE 'admin%'");
++  $result = db_query("SELECT * FROM {menu_links} WHERE link_path = 'admin' OR link_path LIKE 'admin/%'");
+   while ($item = db_fetch_array($result)) {
+     _menu_delete_item($item, TRUE);
+   }

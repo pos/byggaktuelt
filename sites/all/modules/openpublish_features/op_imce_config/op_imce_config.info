@@ -1,0 +1,18 @@
+core = "6.x"
+dependencies[] = "ctools"
+dependencies[] = "strongarm"
+description = "OpenPublish IMCE Configuration"
+features[ctools][] = "variable"
+features[variable][] = "imce_profiles"
+features[variable][] = "imce_roles_profiles"
+name = "OP IMCE Config"
+package = "Features"
+project = "op_imce_config"
+version = "6.x-1.0"
+
+; Information added by drupal.org packaging script on 2010-08-19
+version = "6.x-1.16"
+core = "6.x"
+project = "openpublish_features"
+datestamp = "1282257692"
+

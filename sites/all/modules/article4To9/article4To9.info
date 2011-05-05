@@ -1,0 +1,5 @@
+; $Id$
+name = article4To9
+description = A block module that lists links article 4 and 9 .
+package = Byggaktuelt
+core = 6.x

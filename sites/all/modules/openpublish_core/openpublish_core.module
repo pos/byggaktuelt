@@ -1,0 +1,157 @@
+<?php
+/**
+* @File OpenPublish Core module file.
+*/
+
+/**
+* hook_init implementation
+**/
+function openpublish_core_init() {
+
+   // execute router for various theme preprocessors.
+   $router_file = dirname(__FILE__) . '/theme_helpers/router.inc';
+   if (file_exists($router_file)) {
+     require_once($router_file);
+   }  
+
+  // execute router for various theme preprocessors.
+  $lib_file = dirname(__FILE__) . '/openpublish_core.lib.inc';
+  require_once($lib_file);
+
+   
+   $mod_path = drupal_get_path('module', 'openpublish_core');
+   $js_path = $mod_path . '/openpublish_core.js';
+   drupal_add_js($js_path, 'module', 'footer');
+   drupal_add_js($mod_path . '/combineBlocks.js', 'module');
+   $combineBlocks = array(
+     array("#block-views-most_viewed_by_taxonomy-block", "#block-views-most_commented_articles-block_1"),
+     array("#block-views-most_viewed_by_node_type-block", "#block-views-most_commented_blogs-block_1"),
+     array("#block-views-most_viewed_by_node_type-block", "#block-views-most_commented_articles-block_1"),
+   );
+   drupal_add_js(array('combineBlocks'=>$combineBlocks), 'setting');
+
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function openpublish_core_theme() {
+  return array(
+    'op_related_terms' => array(
+      'arguments' => array('taxonomy' => NULL),
+      'template' => 'op-related-terms',
+    ),
+    'op_addthis_widget' => array(
+      'arguments' => array('addthis_link_title' => NULL),
+      'template' => 'op-addthis-widget',
+    ),
+    'op_breadcrumb' => array(
+      'arguments' => array('breadcrumb' => NULL),
+      'template' => 'op-breadcrumb',
+    ),    
+    'op_homepage_tweets' => array(
+     'arguments' => array('tweets' => NULL, 'twitkey' => NULL, 'title' => NULL),
+     'template' => 'op-homepage-tweets'
+    ),
+    'page_header' => array(
+     'arguments' => array('page_vars' => NULL),
+     'template' => 'page-header'
+    ),
+    'page_footer' => array(
+     'arguments' => array('page_vars' => NULL),
+     'template' => 'page-footer'
+    ),
+    
+  );
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function openpublish_core_views_api() {
+  return array('api' => 2.0);
+}
+
+/**
+ * Implementation of hook_views_default_views().
+ *
+ * Load all the views from the include file in the views/ subdirectory.
+ */
+function openpublish_core_views_default_views() {
+  // Load all views from the "views" subdirectory
+  foreach (glob(dirname(__FILE__) . "/views/*.inc") as $filename) {
+      include_once($filename);
+      $views[$view->name] = $view;
+  }
+  return $views;
+}
+
+/**
+* Get role id by role name. Fork off of Installation APi
+*/
+function openpublish_core_get_rid_by_name($name) {
+  static $roles = array();
+  if (empty($roles[$name])) {
+    $roles[$name] = db_result(db_query_range("SELECT rid FROM {role} WHERE name ='%s'", $name, 0, 1));
+  }
+  return $roles[$name];
+}
+
+/**
+*  Reformat data for use with openpublish_core_add_permissions
+*/
+function openpublish_core_reverse_perm_array($openpublish_perms) {
+  $role_perms = array();
+  foreach ($openpublish_perms as $perm => $roles) {
+    foreach ($roles as $role) {
+      if(!isset($role_perms[$role])) {
+        $role_perms[$role] = array();
+      }
+      $role_perms[$role][] = $perm;
+    }
+  }
+  
+  return $role_perms;
+}
+
+/**
+ * Add the permission for a certain role. Fork off of Installation APi
+ */
+function openpublish_core_add_permissions($rid, $perms) {
+  // Retrieve the currently set permissions.
+  $result = db_query("SELECT p.perm FROM {role} r INNER JOIN {permission} p ON p.rid = r.rid WHERE r.rid = %d ", $rid);
+  $existing_perms = array();
+  while ($row = db_fetch_object($result)) {
+    $existing_perms += explode(', ', $row->perm);
+  }
+  // If this role already has permissions, merge them with the new permissions being set.
+  if (count($existing_perms) > 0) {
+    $perms = array_unique(array_merge($perms, (array)$existing_perms));
+  }
+
+  // Update the permissions.
+  db_query('DELETE FROM {permission} WHERE rid = %d', $rid);
+  db_query("INSERT INTO {permission} (rid, perm) VALUES (%d, '%s')", $rid, implode(', ', $perms));
+}
+
+/**
+ * Implementation of hook_twitter_pull_blocks()
+ */
+function openpublish_core_twitter_pull_blocks() {
+  $block->delta = 'op_tweets';
+  $block->name = t('OpenpPublish Tweets');
+  $block->title = t('Our Tweets');
+  $block->tweetkey = '@openpublish';
+  $block->number_of_items = 3;
+  $block->theme_key = 'op_homepage_tweets';
+  return array($block->delta => $block);
+}
+
+/**
+ * Implementation of template_preprocess_search_result()
+ */
+function openpublish_core_preprocess_search_result(&$vars) {
+  // Conceal user as it does not refer to the author
+  unset($vars['info_split']['user']);
+  $vars['info'] = implode(' - ', $vars['info_split']);
+}

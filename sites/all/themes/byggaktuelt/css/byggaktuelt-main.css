@@ -1,0 +1,416 @@
+@CHARSET "ISO-8859-1";
+
+#wrapper {
+	width:1150px;
+}
+#outer-wrapper {
+    margin: 0;
+    padding: 10px;
+    padding-left:20px;
+    background: url("images/bg.gif") repeat-y scroll center top #E6F2FA;
+    font: 13px/140% arial,helvetica;
+ }
+ .html-advertisement > p {
+    font-size:0em;
+    line-height:0em;
+    margin:0em;   
+}
+
+ #header > div {
+    margin:0px;
+    padding:0px;
+    display:inline-block;
+ 
+ }
+  #header > div > div{
+    margin:0px;
+    padding:0px;
+    display:inline-block;
+ }
+ 
+ #footer {
+    width: 1150px;
+    background-color: #fedc01;
+ }
+ 
+ #internal-wrapper {
+ 	background:none repeat scroll 0 0 #FFFFFF;
+	border-right: 1px solid #DBDBDB;
+	padding:2px;
+        display: inline-block;
+ 	width:986px;
+ }
+/*
+.header-top-right{
+	float:right
+}
+*/
+ body.front-page #sidebar-left {
+	float:left;
+	width:160px;
+}
+#rightcontent {
+	float:left;
+	/*padding:0 0 2px 2px;*/
+	margin-left:4px;
+	width:348px;
+}
+#sidebar-ad{
+	width:150px;
+	margin-left:4px;
+	
+	float:right;
+	background:none;
+}
+body.front-page #container {
+	background:none;
+}
+
+
+body.front-page #op-content {
+	float:left;
+	margin-left: 10px;
+	padding:0 0 0 0px;
+	width:612px;
+}
+
+body.sidebars #center {
+		width:612px;
+	}
+	
+body.sidebar-left #center {
+	border-left:1px solid #B4D7F0;
+	float:left;
+	padding-left:10px;
+	width:612px;
+}
+/*Article */
+.body-content .main-image, #op-content .main-image {
+    padding: 0px;
+}
+.field-field-ingress > .field-label {
+    display: none;
+}
+.field-field-ingress > .field-items .field-item {
+    background:none;
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:0.9em;
+    margin:0px;
+    padding:0px;
+}
+.field-field-ingress {
+    color:#000000;
+    font-weight:bold;
+    margin: 0px;
+    margin-bottom: 1.0em;
+    padding: 0px;
+}
+/*Menu*/
+#nav ul.primary-links {
+	background-image:url("../images/bg_menu-l2.png");
+	background-repeat:repeat-x;
+         
+}
+#nav ul.primary-links li.first-level:hover  {
+    background-image:url("../images/bg_meny2.jpg");
+    background-repeat:repeat-x;
+}
+
+.fragment-separator {
+	padding: 1px;
+	float:left;
+	width:202px;
+}
+
+.fragment {
+        padding:2px;
+	float:left;
+	width:192px;
+}
+.fragment > h3{
+    margin: 2px;
+}
+.fragment-right{
+     
+      float:right;
+      width:200px;
+}
+.linebreak {
+	border-bottom:1px solid #CCCCCC;
+	clear:both;
+	display:block;
+	margin-bottom:3px;
+	padding-bottom:4px;
+}
+.fragmentRowLinebreak {
+	clear:both;
+	display:block;
+	margin-bottom:3px;
+	padding-bottom:4px;
+}
+#context-block-region-left h2 {
+	background-image:url("/drupal/byggaktuelt/sites/all/themes/byggaktuelt/images/bg_block_title_gray.gif") !important;
+	color:#FFFFFF;
+	font-family:arial,helvetica;
+	font-size:12px;
+	font-weight:bold;
+	height:20px;
+	padding-left:0;
+	padding-top:5px;
+	margin-bottom: -5px;
+	text-align:center;
+	width:174px;
+}
+#context-block-region-left  .content {
+	background:url("/drupal/byggaktuelt/sites/all/themes/byggaktuelt/images/bg_block_content.gif") no-repeat scroll left bottom transparent;
+	margin:0;
+	padding:0 0 1em 1em;
+	width:174px;
+}
+/*Article */
+.front-article-row { padding-top:5px; padding-bottom:5px; }
+
+/*AD*/
+.ad-front {
+	border-bottom:1px solid #CCCCCC;
+	border-top:1px solid #CCCCCC;
+	clear:both;
+	margin:5px 0;
+	padding-bottom:15px;
+	padding-top:15px;
+	text-align:center;
+	
+}
+.ad-front h2 {
+	background:none;
+	border-bottom:none;
+	margin:0px;
+	padding:0px;
+	color:#AEAEAE;
+	font-size:10px;
+	text-align:left;
+	width:100%;
+	
+	
+}
+.frontpage-small-ad {
+	border-bottom:1px solid #CCCCCC;
+	border-top:1px solid #CCCCCC;
+	clear:both;
+	margin:5px 0;
+	padding-bottom:15px;
+	padding-top:15px;
+	text-align:center;	
+}
+
+.frontpage-small-ad > div > div > div{
+	display:inline-block;
+	padding-left:2px;
+	margin-right:0px;
+
+}
+.frontpage-small-ad h2 {
+	background:none;
+	border-bottom:none;
+	margin:0px;
+	padding:0px;
+	color:#AEAEAE;
+	font-size:10px;
+	text-align:left;
+	width:100%;	
+	
+}	
+
+div#drupal-control-bar li.active a {
+background:none repeat scroll 0 0 #000000;
+border:medium none;
+color:#FFFFFF;
+font-weight:bold;
+text-decoration:none;
+}
+div#drupal-control-bar li a {
+border:medium none;
+color:#CCCCCC;
+}
+
+.prosjektfakta{
+    background-image:url("../images/ba_header_bg.gif");
+    background-repeat:repeat-x;
+   
+    
+    
+}
+.prosjektfakta ul{
+    /*background-image:url("../images/bg_menu-l2.png");
+    background-repeat:repeat;*/
+    font:13px/140% arial,helvetica;
+    background-color: #EFEFEF;
+    height: 300px;
+
+    overflow-x:hidden;
+    overflow-y:auto;
+}
+.prosjektfakta > div > div > h3{
+    margin-left: 20px;
+    margin-top: 0px;
+}
+#logo-area {
+    background: url("../images/ba3_topp_bg.gif") transparent;
+    height: 123px;
+    width: 986px;
+    background-repeat:repeat-x;
+    background-position: center;
+   
+}
+
+#search_box_top {
+    padding-top: 35px;
+
+}
+#top-menu {
+    border: none;
+    
+}
+#top-menu ul#login-menu {
+    margin-left:20px;
+}
+input.form-text {
+   /* height: 37px;*/
+}
+ul#login-menu li.hello {
+border-right:none;
+font-style:italic;
+}
+#faktanetlogin-my-form {
+    margin-bottom: 12px;
+    
+}
+#fagpressen{ float: right;}
+#fagpressen a{
+    background:url("../images/ba/Fagpressen.gif") no-repeat scroll 0 0 transparent;
+    display:block;
+    height:41px;
+    text-indent:-9000px;
+    width:125px
+}
+
+ .prosjektfakta > div > div > ul >.views-row-even{
+    background-color: #FFFFFF;
+    width: 320px;
+    min-height:50px;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    
+}
+
+.prosjektfakta > div > div > ul > .views-row-odd{
+    width: 320px;
+    min-height:50px;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+
+}
+
+.field-content > a{
+   font:13px/140% arial,helvetica;
+
+}
+#buildcalculator-my-form > div > div{
+    width: 50%;
+    float: right;
+}
+#buildcalculator-my-form > div > div > select {
+   width: 94%;
+   float: left;
+   height: 28px;
+   padding: 4px 2px 4px 4px;
+}
+#buildcalculator-meter {
+    
+}
+#buildcalculator-status {
+    float: right;
+}
+
+#faktanetlogin-my-form > div > div {
+    width: 50%;
+    float: right;
+}
+
+/*
+    Buildcalculator_advance
+*/
+
+
+#edit-buildtypeadv-wrapper {
+    float: left;
+}
+#edit-buildtypeadv{
+    height: 27px;
+}
+
+#edit-provinceadv-wrapper {
+     float: left;
+     padding-left: 2em;
+}
+#edit-provinceadv{
+    height: 27px;
+}
+
+#buildcalculator_adv-meter-wrapper {
+     float: left;
+     padding-left: 2em;
+}
+.buildcalculator-buttons{
+    float: right;
+    display: block;
+    margin-top: 2em;
+    margin-bottom: 3em;
+    width: 100%;
+    
+}
+
+
+.result-col1{
+    float: left;
+    width: 50%;
+    font-size: 14px;
+    font-weight: bold;
+}
+.result-col2{
+    float: left;
+    width: 10%;
+}
+.result-col3{
+    float: left;
+    width: 30%;
+}
+
+.buildcalc-row{
+    width: 100%;
+    font-weight: bold;
+    padding-top: 1em;
+}
+
+.buildcalc-total{
+    margin-bottom: 4em;
+    margin-top: 4em;
+    clear: both;
+    display: block;
+}
+#loadingDiv{
+    float: left;
+    margin-right: 50%;
+}
+
+#buildcalculator_adv_submit{
+    float: left;
+    width:15%;
+    margin-right: 10%;
+    margin-top: 1em;
+}
+#buildcalculator_adv_print{
+     width:15%;
+     float: left;
+     margin-top: 1em;
+}

@@ -1,0 +1,118 @@
+<?php
+	// $Id$
+	
+
+
+
+// This function defines the URL to the page created etc.
+// See http&#58;//api.drupal.org/api/function/hook_menu/6
+function faktanetlogin_menu() {
+  $items = array();
+  $items['faktanetlogin/form'] = array(
+    'title' => t('faktanetlogin'),
+    'page callback' => 'faktanetlogin_form',
+    'access arguments' => array('access content'),
+    'description' => t('faktanetlogin'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+// This function gets called in the browser address bar for:
+//"http://yourhost/my_module/form" or
+//"http://yourhost/?q=my_module/form". It will generate// a page with //this form on it.
+
+function faktanetlogin_form() {
+
+  // This form calls the form builder function via the
+  // drupal_get_form() function which takes the name of this form builder
+  // function as an argument. It returns the results to display the form.
+return drupal_get_form('faktanetlogin_my_form');
+
+}
+
+// This function is called the "form builder". It builds the form.
+// Notice, it takes one argument, the $form_state
+function faktanetlogin_my_form($form_state) {
+   
+    // This is the first form element. It's a textfield with a label, "Name"
+  /*$form['faktanet'] = array(
+    '#type' => 'fieldset',
+    '#title' => t(''),
+  	'#size' => 16,
+  ); */ 	
+	
+  $form['username'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Brukernavn'),
+  	'#size' => 16,
+  );
+  $form['password'] = array(
+    '#type' => 'password',
+    '#title' => t('Passord'),
+  	'#size' => 16,
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Logg in'),
+  );
+  
+  $form['#method'] = 'post';
+  $form['#action'] = 'http://www.faktanetlive.com/pages/login.aspx';
+ 
+  return $form;
+}
+
+
+function faktanetlogin_theme() {
+  return array(
+    'forums' => array(
+      'template' => 'faktanetlogin',
+      'arguments' => array('node' => NULL),
+    ));
+}
+    
+/**
+* Valid permissions for this module
+* @return array An array of valid permissions for the externalnews module
+*/
+function faktanetlogin_perm() {
+  return array('access faktanetlogin content');
+} // function onthisdate_perm()
+
+/**
+* Implementation of hook_block
+* @param string $op one of "list", "view", "save" and "configure"
+* @param integer $delta code to identify the block
+* @param array $edit only for "save" operation
+**/
+function faktanetlogin_block($op = 'list', $delta = 0, $edit = array()) {  
+  if ($op == "list") {
+    // Generate listing of blocks from this module, for the admin/block page
+    $block = array();
+    $block[0]["info"] = t('FaktaNetLogin');
+    return $block;
+  }else if ($op == 'view') {
+  	
+	$path = 'images/image.gif';
+   	$block_content .= theme_image($path, $alt = '', $title = '', $attributes = NULL, $getsize = TRUE);
+   	$block_content .= "<img src='". $GLOBALS['base_url']."/sites/all/themes/byggaktuelt/images/FaktaNETlive_logo.gif' width='120px' />";
+   	$block_content .= faktanetlogin_form();
+	
+    // check to see if there was any content before returning
+    //  the block view
+    if ($block_content == '') {   
+       $block['subject'] = 'FaktaNetLogin';
+       $block['content'] = 'Sorry No Projects';
+       return $block;
+    }
+    // set up the block
+    $block['subject'] = 'FaktaNetLogin';
+    $block['content'] = $block_content;
+    return $block;
+  } 
+  
+} 
+
+

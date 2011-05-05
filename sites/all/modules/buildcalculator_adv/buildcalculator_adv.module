@@ -1,0 +1,326 @@
+<?php
+
+// $Id$
+// This function defines the URL to the page created etc.
+// See http&#58;//api.drupal.org/api/function/hook_menu/6
+function buildcalculator_adv_menu() {
+    $items = array();
+
+    $items['calculator'] = array(
+        'page callback' => 'buildcalculator_adv_calculate',
+        'type' => MENU_CALLBACK,
+        'access arguments' => array('access content'),
+    );
+   
+
+    return $items;
+}
+function buildcalculator_adv_calculate() {
+
+   $buildtypeValue = floatval( $_POST['buildtypeValue'] );
+   $province = floatval(  $_POST['province'] );
+   $meter = floatval($_POST['meter']);
+
+   $houseSum = $buildtypeValue * $meter;
+   $houseSum = $houseSum * $province;
+   $sum = $houseSum;
+   $houseaddons = $sum*'0.597';
+   $total = $sum + $houseaddons;
+   $result = array();
+
+   $result['housesum'] =  number_format($houseSum, 0, ',', ' ');
+   $result['houseaddons'] = number_format($houseaddons,  0, ',', ' ');
+   $result['total'] = number_format($total,  0, ',', ' ');
+   
+   $result['gj']['vent'] = number_format($sum * '0.0422',  0, ',', ' ');
+   $result['gj']['ror'] = number_format($sum * '0.0778',  0, ',', ' ');
+   $result['gj']['el'] = number_format($sum * '0.1102',  0, ',', ' ');
+
+   $result['add']['honorarer'] = number_format($sum * '0.121',  0, ',', ' ');
+   $result['add']['adm'] = number_format($sum * '0.046',  0, ',', ' ');
+   $result['add']['fin'] = number_format($sum * '0.047',  0, ',', ' ');
+   $result['add']['tomt'] = number_format($sum *  '0.084',  0, ',', ' ');
+   $result['add']['andre'] = number_format($sum *  '0.046',  0, ',', ' ');
+   $result['add']['offent'] = number_format($sum *  '0.253',  0, ',', ' ');
+
+
+    return  drupal_json( array('status' => 0 ,'data' => $result ) );
+}
+
+function buildcalculator_adv_form() {
+
+    return drupal_get_form('buildcalculator_adv_my_form');
+}
+
+// This function is called the "form builder". It builds the form.
+// Notice, it takes one argument, the $form_state
+function buildcalculator_adv_my_form($form_state) {
+
+   drupal_add_js(drupal_get_path('module', 'buildcalculator_adv') . '/buildcalculator_adv.js', 'module');
+
+
+    $form['buildcalculator']['buildtypeadv'] = array(
+        '#type' => 'select',
+        '#title' => t('Velg kategori'),
+        '#default_value' => $form_state['values']['buildtype'],
+        '#options' => buildcalculator_adv_getBuildTypeAndPrice(),
+    );
+
+    $form['buildcalculator']['provinceadv'] = array(
+        '#type' => 'select',
+        '#title' => t('Velg Fylke'),
+        '#default_value' => $form_state['values']['province'],
+        '#options' => buildcalculator_adv_getProvince(),
+    );
+
+
+
+    $form['buildcalculator']['meteradv'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Antall kvadratmeter'),
+        '#id' => 'buildcalculator_adv-meter',
+        '#size' => 16,
+    );
+  
+
+    $form['buildcalculator']['submit'] = array(
+        '#type' => 'submit',
+        '#id' => 'buildcalculator_adv_submit',
+        '#value' => t('Oppdater'),
+        '#validated' => TRUE,
+    );
+
+    $form['buildcalculator']['print'] = array(
+        '#type' => 'submit',
+        '#id' => 'buildcalculator_adv_print',
+        '#value' => t('Skriv ut'),
+        '#attributes' => array('onclick' => 'JavaScript:window.print();'),//
+        '#validated' => TRUE,
+    );
+
+    return $form;
+}
+
+function buildcalculator_adv_callback_submit(&$form, $form_state) {
+   
+}
+
+function buildcalculator_adv_json($url = "") {
+    $oXML = "";
+   $ch = curl_init();
+   curl_setopt($ch, CURLOPT_URL,$url);
+   curl_setopt($ch, CURLOPT_FAILONERROR,1);
+   curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1);
+   curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+   curl_setopt($ch, CURLOPT_TIMEOUT, 85);
+   $retValue = curl_exec($ch);
+   curl_close($ch);
+   //str_replace( array('<script type="text/javascript">','</script>'), '', $retValue);
+
+   return json_decode($retValue);
+
+}
+
+function buildcalculator_adv_xml($url = "") {
+   $oXML = "";
+   $ch = curl_init();
+   curl_setopt($ch, CURLOPT_URL,$url);
+   curl_setopt($ch, CURLOPT_FAILONERROR,1);
+   curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1);
+   curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+   curl_setopt($ch, CURLOPT_TIMEOUT, 85);
+   $retValue = curl_exec($ch);
+   curl_close($ch);
+   if ($retValue != null) {
+       if ( simplexml_load_string($retValue) ) {
+           try{
+                $oXML = new SimpleXMLElement($retValue);
+            }
+            catch (Exception $e ){
+
+            }
+       }
+   }
+
+    return $oXML;
+
+}
+
+function buildcalculator_adv_getProvince() {
+   
+    $url = 'http://cake.docuonline.com/2009/byggfakta_origo/bygge_cost_cats/geo.xml';
+   
+    $oXML =  buildcalculator_adv_xml($url);
+    $option = array();
+    $option[0] = 'Velg Fylke';
+    for ($index = 0; $index < count($oXML->province) ; $index++) {
+        $option[ strval( $oXML->province[$index]->price )] = strval( $oXML->province[$index]->name );
+    }
+    
+    return $option;
+}
+
+function buildcalculator_adv_getBuildTypeAndPrice() {
+    $url = 'http://cake.docuonline.com/2009/byggfakta_origo/bygge_cost_cats/category.xml';
+
+    $oXML =  buildcalculator_adv_xml($url);
+    $option = array();
+    $option[0] = 'Velg byggtype';
+    for ($index = 0; $index < count($oXML->cat) ; $index++) {
+        $option[ strval( $oXML->cat[$index]->price )] = strval( $oXML->cat[$index]->name );
+    }
+
+    return $option;
+}
+
+/**
+ * Handle post-validation form submission.
+ */
+function buildcalculator_adv_my_form_submit($form_id, $form_values) {
+    $buildtype = $form_values['values']['buildtype'];
+    $meter = $form_values['values']['meter'];
+    $result = $buildtype * $meter;
+    drupal_set_message(t('Prisanslag (kr eks mva) <br /> %result Nkr',
+                    array('%result' => $result)));
+    $vars['result'] = t($result);
+}
+
+/**
+ * Valid permissions for this module
+ * @return array An array of valid permissions for the externalnews module
+ */
+function buildcalculator_adv_perm() {
+    return array('access buildcalculator_adv content');
+}
+
+/**
+ * Implementation of hook_block
+ * @param string $op one of "list", "view", "save" and "configure"
+ * @param integer $delta code to identify the block
+ * @param array $edit only for "save" operation
+ * */
+function buildcalculator_adv_block($op = 'list', $delta = 0, $edit = array()) {
+    if ($op == "list") {
+        $block = array();
+        $block[0]["info"] = t('Build Calculator ADV');
+        return $block;
+    } else if ($op == 'view') {
+
+        //$block_content .= "<h3>Avansert byggekostnadskalkulator</h3>";
+        $block_content .= buildcalculator_adv_form();
+        $block_content .= '<div id="loadingDiv" > </div>';
+        
+        $block_content .=buildcalculator_adv_create_table() ;
+    
+        if ($block_content == '') {
+            $block['subject'] = 'Build Calculator ADV';
+            $block['content'] = 'Sorry No Projects';
+            return $block;
+        }
+       
+        $block['subject'] = 'Build Calculator ADV';
+        $block['content'] = $block_content;
+        return $block;
+    }
+}
+
+function buildcalculator_adv_create_table(){
+    
+    $html = '<div id="buildcalculator_adv_result" >';
+        $html .= '<div class="buildcalc-total" >';
+         $html .= '<div class="buildcalc-row"> </div>';
+         $html .= '<div class="buildcalc-row">';
+           $html .= '<div class="result-col1" >Totalt huskostnader:</div>';
+               $html .= '<div class="result-col2" > Kr  </div> ';
+               $html .= '<div class="result-col3" id="totalt_huskostnader" > 0 </div>';
+            $html .= '</div>';
+        $html.= '</div>';
+
+         $html.= '<div class="buildcalc-total">';
+         $html.= '<div class="buildcalc-row">Hvor av:</div>';
+
+           $html.= '<div class="buildcalc-row">';
+               $html.= '<div class="result-col1"> Gj.Ventilasjonskostnad 4,22%   </div>';
+               $html.= '<div class="result-col2"> Kr </div>';
+               $html.= '<div class="result-col3" id="gj_ventilasjonskostnad">0</div>';
+           $html.= '</div>';
+
+           $html.= '<div class="buildcalc-row">';
+               $html.= '<div class="result-col1"> Gj.Rørkostnad 7,78%    </div>';
+              $html.= '<div class="result-col2"> Kr </div>';
+               $html.= '<div class="result-col3" id="gj_rorkostnad">0</div>';
+           $html.= '</div>';
+
+           $html.= '<div class="buildcalc-row">';
+               $html.= '<div class="result-col1"> Gj.Elkostnad 11,02%  </div>';
+               $html.= '<div class="result-col2"> Kr </div>';
+              $html.= '<div class="result-col3" id="gj_elkostnad">0</div>';
+           $html.= '</div>';
+       $html.= '</div>';
+
+       $html.= '<div class="buildcalc-total" >';
+           $html.= '<div class="buildcalc-row">';
+               $html.= '<div class="result-col1">Påslag 59.7% </div>';
+              $html.= '<div class="result-col2"> Kr </div>';
+               $html.= '<div class="result-col3" id="paslag">0</div>';
+           $html.= '</div>';
+       $html.= '</div>';
+
+         $html.= '<div class="buildcalc-total" >';
+            $html.= '<div class="buildcalc-row">Hvor av ca:</div>';
+
+           $html.= '<div class="buildcalc-row">';
+                $html.= '<div class="result-col1">Honorarer 12,1%</div>';
+                $html.= '<div class="result-col2"> Kr </div>';
+               $html.= '<div class="result-col3" id="honorarer" >0</div>';
+            $html.= '</div>';
+
+            $html.= '<div class="buildcalc-row">';
+                $html.= '<div class="result-col1">Adm.og byggeledelse 4,6%</div>';
+                $html.= '<div class="result-col2"> Kr </div>';
+                $html.= '<div class="result-col3" id="adm_og_byggeledelse" >0</div>';
+            $html.= '</div>';
+
+            $html.= '<div class="buildcalc-row">';
+                $html.= '<div class="result-col1">Finansieringskostnader 4,7% </div>';
+                $html.= '<div class="result-col2"> Kr </div>';
+                $html.= '<div class="result-col3" id="finansieringskostnader" >0</div>';
+            $html.= '</div>';
+
+            $html.= '<div class="buildcalc-row">';
+                $html.= '<div class="result-col1">Tomtekostnader 8,4% </div>';
+                $html.= '<div class="result-col2"> Kr </div>';
+               $html.= '<div class="result-col3" id="tomtekostnader" >0</div>';
+            $html.= '</div>';
+
+            $html.= '<div class="buildcalc-row">';
+                $html.= '<div class="result-col1">Andre kostnader 4,6%  </div>';
+               $html.= '<div class="result-col2"> Kr </div>';
+               $html.= '<div class="result-col3" id="andre_kostnader" >0</div>';
+            $html.= '</div>';
+
+            $html.= '<div class="buildcalc-row">';
+               $html.= '<div class="result-col1">Offentlige avgifter 25,3%</div>';
+                $html.= '<div class="result-col2"> Kr</div>';
+                $html.= '<div class="result-col3" id="offentlige_avgifter" >0</div>';
+            $html.= '</div>';
+       $html.= '</div>';
+
+        $html.= '<div class="buildcalc-total" >';
+            $html.= '<div class="buildcalc-row">';
+               $html.= '<div class="result-col1" ><strong>Totalkostnad: </strong></div>';
+                $html.= '<div class="result-col2"> Kr </div>';
+                $html.= '<div class="result-col3" id="totalkostnad" >0</div>';
+            $html.= '</div>';
+      $html.= '</div>';
+
+
+  $html.= '</div>';
+
+  return $html;
+}
+
+function template_preprocess_buildcalculator_adv(&$node) {
+
+}
+

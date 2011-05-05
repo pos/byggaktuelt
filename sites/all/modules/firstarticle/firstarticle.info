@@ -1,0 +1,5 @@
+; $Id$
+name = firstarticle
+description = A block module that lists links to the latest article firstarticle.
+package = Byggaktuelt
+core = 6.x

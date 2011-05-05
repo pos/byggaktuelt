@@ -1,0 +1,5 @@
+; $Id$
+name = Article Listing
+description = A block module that lists all article.
+package = Byggaktuelt
+core = 6.x

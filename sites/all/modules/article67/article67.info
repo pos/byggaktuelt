@@ -1,0 +1,5 @@
+; $Id$
+name = article67
+description = A block module that lists links article 6 and 7 used in panel startpage .
+package = Byggaktuelt
+core = 6.x

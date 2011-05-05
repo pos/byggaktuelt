@@ -1,0 +1,179 @@
+<?php
+	// $Id$
+	
+
+
+
+// This function defines the URL to the page created etc.
+// See http&#58;//api.drupal.org/api/function/hook_menu/6
+function buildcalculator_menu() {
+  $items = array();
+  $items['buildcalculator'] = array(
+    'title' => t('buildcalculator'),
+    'page callback' => 'buildcalculator_form',
+    'page arguments' => array('buildcalculator'), 
+    'access arguments' => array('access content'),
+    'description' => t('buildcalculator'),
+    'type' => MENU_CALLBACK,
+  );
+ 
+  return $items;
+}
+
+
+// This function gets called in the browser address bar for:
+//"http://yourhost/my_module/form" or
+//"http://yourhost/?q=my_module/form". It will generate// a page with //this form on it.
+
+function buildcalculator_form() {
+
+  // This form calls the form builder function via the
+  // drupal_get_form() function which takes the name of this form builder
+  // function as an argument. It returns the results to display the form.
+return drupal_get_form('buildcalculator_my_form');
+
+}
+
+// This function is called the "form builder". It builds the form.
+// Notice, it takes one argument, the $form_state
+function buildcalculator_my_form($form_state) {
+   $path = drupal_get_path('module', 'buildcalculator');
+   drupal_add_js($path . '/buildcalculator.js', 'module');
+   
+  $form['buildtype'] = array(
+    '#type' => 'select',
+    '#title' => t('Velg kategori'),
+    '#default_value' => $form_state['values']['buildtype'],
+    '#options' => getBuildTypeAndPrice(),
+  );
+
+  
+	
+  $form['meter'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Antall kvadratmeter'),
+    '#id' => 'buildcalculator-meter',
+    '#size' => 16,
+  );
+
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Beregn pris'),
+    '#id' => 'buildcalculator-submit',
+  );
+
+  $form['status'] = array(
+    '#type' => 'markup',
+    '#value' => "<div id='buildcalculator-status'></div>",
+  );
+  
+  return $form;
+}
+
+function getBuildTypeAndPrice() {
+
+    $url = 'http://cake.docuonline.com/2009/byggfakta_origo/bygge_cost_cats/category.xml';
+
+    $oXML =  buildcalculator_adv_xml($url);
+    $option = array();
+    $option[0] = 'Velg byggtype';
+    for ($index = 0; $index < count($oXML->cat) ; $index++) {
+        $option[ strval( $oXML->cat[$index]->price )] = strval( $oXML->cat[$index]->name );
+    }
+
+    return $option;
+   
+}
+
+/**
+* Validate the form.
+*/
+function buildcalculator_my_form_validate($form_id, $form_values) {
+  if ($form_values['values']['meter'] == '') {
+    // We notify the form API that this field has failed validation.
+    form_set_error('meter',
+      t('Enter an value.'));
+  }
+ 
+}
+/**
+* Handle post-validation form submission.
+*/
+function buildcalculator_my_form_submit($form_id, $form_values) {
+  $buildtype = $form_values['values']['buildtype'];	
+  $meter = $form_values['values']['meter'];
+  $result = $buildtype*$meter;
+  drupal_set_message(t('Prisanslag (kr eks mva) <br /> %result Nkr',
+    array('%result' => $result)));
+  $vars['result'] = t($result);
+   //form_set_value($form_values['values']['meter'], 1000,$form_values['status'] ); 
+ 
+
+}
+
+
+function buildcalculator_theme() {
+  return array(
+    'forums' => array(
+      'template' => 'buildcalculator',
+      'arguments' => array('node' => NULL),
+    ));
+}
+    
+/**
+* Valid permissions for this module
+* @return array An array of valid permissions for the externalnews module
+*/
+function buildcalculator_perm() {
+  return array('access buildcalculator content');
+} // function onthisdate_perm()
+
+/**
+* Implementation of hook_block
+* @param string $op one of "list", "view", "save" and "configure"
+* @param integer $delta code to identify the block
+* @param array $edit only for "save" operation
+**/
+function buildcalculator_block($op = 'list', $delta = 0, $edit = array()) {  
+  if ($op == "list") {
+    // Generate listing of blocks from this module, for the admin/block page
+    $block = array();
+    $block[0]["info"] = t('Build Calculator');
+    return $block;
+  }else if ($op == 'view') {
+  	
+    //$block_content .= "<img src='". $GLOBALS['base_url']."/sites/all/themes/byggaktuelt/images/byggekostnader_1.jpg' height='80px' width='100px' />";
+    $block_content .="<div class='block-info-underline' style='margin-bottom:9px;padding-bottom:4px;border-bottom:solid 1px;'></div>";
+    $block_content .= "<h3>Byggekostnadskalkulator</h3>";
+    $block_content .= buildcalculator_form();
+   	
+    $block_content .=t('Avansert ');
+    $block_content .= t("<br />byggekostnadskalkulator<br />");
+    $block_content .= l( t('Klikk her for å logge inn') ,
+                        'http://www.byggaktuelt.no/user',
+                         array('attributes' => array('target' => '_blank') )
+                       );
+    $block_content .="<div class='block-info-underline' style='margin-bottom:9px;padding-bottom:4px;border-bottom:solid 1px;'></div>";
+	
+    // check to see if there was any content before returning
+    //  the block view
+    if ($block_content == '') {   
+       $block['subject'] = 'Build Calculator';
+       $block['content'] = 'Sorry No Projects';
+       return $block;
+    }
+    // set up the block
+    $block['subject'] = 'Build Calculator';
+    $block['content'] = $block_content;
+    return $block;
+  } 
+  
+} 
+
+function template_preprocess_buildcalculator(&$node) {
+	
+ 
+}
+
+

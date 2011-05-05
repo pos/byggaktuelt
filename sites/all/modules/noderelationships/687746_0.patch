@@ -1,0 +1,75 @@
+--- noderelationships.module	2010/01/03 20:45:10	1.1.2.24
++++ noderelationships.module	2010/01/18 02:14:43	1.1.2.25
+@@ -451,12 +451,19 @@
+ }
+ 
+-/**
+- * Proxy function to invoke node form after_build and pre_render callbacks,
+- * because the file where the real handler is implemented might not be included
+- * yet when the form is processed and invokes the callback.
+- */
+-function _noderelationships_child_node_form_pre_render_proxy($form) {
+-  module_load_include('inc', 'noderelationships');
+-  module_load_include('inc', 'noderelationships', 'noderelationships.pages');
+-  return _noderelationships_child_node_form_pre_render($form);
+-}
++/**
++ * Proxy function to invoke the pre_render callback for the child node form.
++  */
++function _noderelationships_child_node_form_pre_render_proxy($form) {
++  module_load_include('inc', 'noderelationships');
++  module_load_include('inc', 'noderelationships', 'noderelationships.pages');
++  return _noderelationships_child_node_form_pre_render($form);
++}
++
++/**
++ * Proxy function to invoke the submit handler for the child node form.
++ */
++function _noderelationships_child_node_form_submit_proxy($form, &$form_state) {
++  module_load_include('inc', 'noderelationships');
++  module_load_include('inc', 'noderelationships', 'noderelationships.pages');
++  _noderelationships_child_node_form_submit($form, $form_state);
++}
+
+--- noderelationships.pages.inc	2010/01/03 20:45:11	1.1.2.24
++++ noderelationships.pages.inc	2010/01/18 02:14:43	1.1.2.25
+@@ -406,7 +406,8 @@
+       if (isset($creatable_types[$new_type])) {
+         $_GET['noderelationships_referrer_type'] = $referrer_type;
+         $_GET['noderelationships_field_name'] = $field_name;
+-        $query = noderelationships_querystring();
++        $query = drupal_query_string_encode($_GET, array('q'));
++        unset($_REQUEST['destination'], $_REQUEST['edit']['destination']);
+         drupal_goto('node/add/'. str_replace('_', '-', $new_type), $query);
+       }
+     }
+@@ -703,7 +704,7 @@
+ 
+   // Append our submit handler so we can tell the parent window to close
+   // the modal frame and update the node reference field.
+-  $form['buttons']['submit']['#submit'][] = '_noderelationships_child_node_form_submit';
++  $form['buttons']['submit']['#submit'][] = '_noderelationships_child_node_form_submit_proxy';
+ }
+ 
+ /**
+@@ -738,13 +739,16 @@
+ }
+ 
+ /**
+- * Submit handler for child node form.
++ * Submit handler for the child node form.
+  */
+ function _noderelationships_child_node_form_submit($form, &$form_state) {
+   // Read the node title from fresh node so that modules such as Automatic Node
+   // Titles [1] can do their own job, and then we can get the resulting title.
+   // [1] http://drupal.org/project/auto_nodetitle
+-  $node = node_load($form_state['nid']);
++  // Also, clear the static storage of node_load() because it could have been
++  // executed by another module during this page request, which would bring us
++  // a non-updated version of the node.
++  $node = node_load($form_state['nid'], NULL, TRUE);
+   modalframe_close_dialog(array(
+     'operation' => 'updateSingleValue',
+     'value' => $node->title .' [nid:'. $form_state['nid'] .']',
+
+

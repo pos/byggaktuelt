@@ -1,0 +1,11 @@
+--- acquia_search.install.orig	2009-11-05 16:52:12.000000000 -0500
++++ acquia_search.install	2009-11-05 18:27:22.000000000 -0500
+@@ -9,7 +9,7 @@ function acquia_search_requirements($pha
+   // Ensure translations don't break at install time
+   $t = get_t();
+ 
+-  if ($phase == 'install') {
++  if ($phase == 'install' && MAINTENANCE_MODE != "install") {
+     if (module_invoke('acquia_agent', 'has_credentials')) {
+       $severity = REQUIREMENT_OK;
+     }

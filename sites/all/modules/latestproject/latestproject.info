@@ -1,0 +1,5 @@
+; $Id$
+name = List LatestProject
+description = A block module that lists links latest project 
+package = Byggaktuelt
+core = 6.x

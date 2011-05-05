@@ -1,0 +1,172 @@
+<?php
+// $Id: twitter_pull.module,v 1.1.2.3 2010/04/03 05:19:15 inadarei Exp $
+
+/**
+ * @file
+ * Twitter Pull module.
+ */
+
+require_once (dirname(__FILE__) . '/twitter_pull.class.inc');
+
+define ('TWITTER_PULL_NUM_ITEMS', 5);
+define ('TWITTER_PULL_CACHE_LENGTH', 20); //-- cache for 20 minutes
+define ('TWITTER_PULL_EMPTY_MESSAGE', 'No Tweets');
+define ('TWITTER_PULL_CACHE_TABLE', 'cache_pulled_tweets');
+
+function twitter_pull_num_items() {
+  return variable_get('twitter_pull_num_items', TWITTER_PULL_NUM_ITEMS);
+}
+
+function twitter_pull_cache_length() {
+  return variable_get('twitter_pull_cache_length', TWITTER_PULL_CACHE_LENGTH);
+}
+
+function twitter_pull_empty_message() {
+  return variable_get('twitter_pull_empty_message', TWITTER_PULL_EMPTY_MESSAGE);
+}
+
+/**
+ * Implementation of hook_flush_caches().
+ */
+function twitter_pull_flush_caches() {
+  return array(TWITTER_PULL_CACHE_TABLE);
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function twitter_pull_init() {
+  $css_path = drupal_get_path('module', 'twitter_pull') . '/twitter-pull-listing.css';
+  drupal_add_css($css_path);
+}
+
+/**
+ * Retrieves appropriate tweets (by username, hashkey or search term)
+ * and passes over to the theming function with $themekey key passing
+ * tweets array along.
+ *
+ * The rest of this module needs to make sure that corresponding theming
+ * functions exist, exist tweets array and perform desired theming.
+ *
+ * @param $twitkey
+ *     Twitter key, which can be a username (prepended with @), hashtag
+ *     (prepended with #), or a search term.
+ * @param $title
+ *     Title passed to the theme template.
+ * @param $num_items
+ *     Number of tweets to retrieve from Twitter. Can't be more than 200.
+ * @param $themekey
+ *     Theme key name to use for theming the output of Twitter API.
+ */
+function twitter_pull_render($twitkey, $title = NULL, $num_items = NULL, $themekey = NULL) {
+  //-- Set defaults if empty arguments were passed
+  $title = (empty($title) && $title != FALSE ) ? t('Related Tweets') : $title;
+  $themekey = empty($themekey) ? 'twitter_pull_listing' : $themekey;
+  $num_items = empty($num_items) ? twitter_pull_num_items() : $num_items;
+
+  $tweets = twitter_pull_retrieve($twitkey, $num_items);
+
+  $ret = theme($themekey, $tweets, $twitkey, $title);
+
+  if (empty($ret) && !empty($tweets)) {
+    $errmsg = t("Non-empty list of tweets returned blank space after applying theme function. Most probably you are passing invalid/unregistered theme key or tpl file corresponding to the theme key does not yet exist. Please fix the problem.");
+    watchdog('Twitter Pull', $errmsg, array(), WATCHDOG_WARNING);
+    $ret = t('Errors occured while trying to retrieve tweets. Please check Watchdog log messages.');
+  }
+
+  return $ret;
+}
+
+/**
+ * Retrieves tweets by username, hashkey or search term.
+ *
+ * @param $twitkey
+ *     Twitter key, which can be a username (prepended with @), hashtag
+ *     (prepended with #), or a search term.
+ * @param $num_items
+ *     Number of tweets to retrieve from Twitter. Can't be more than 200.
+ */
+function twitter_pull_retrieve($twitkey, $num_items = NULL) {
+  // If $num_items is not set, use the default value.
+  // This value is checked more rigorously in twitter_puller->check_arguments().
+  $num_items = (intval($num_items) > 0) ? intval($num_items) : twitter_pull_num_items();
+
+  // Cached value is specific to the Twitter key and number of tweets retrieved.
+  $cache_key = $twitkey . '::' . $num_items;
+  $cache = cache_get($cache_key, TWITTER_PULL_CACHE_TABLE);
+
+  $tweets = array();
+
+  if (!empty($cache) && !empty($cache->data)) {
+    $tweets =  $cache->data;
+  }
+  else {
+    try {
+      $puller = new twitter_puller($twitkey, $num_items);
+      $puller->get_items();
+      $tweets = $puller->tweets;
+    }
+    catch (Exception $e) {
+      watchdog('Twitter Pull', $e->getMessage(), array(), WATCHDOG_WARNING);
+      return twitter_pull_empty_message();
+    }
+
+    if (!empty($tweets) && is_array($tweets)) {
+      $cache_length = twitter_pull_cache_length() * 60; //-- in the settings we indicate length in minutes, here we need seconds.
+      cache_set($cache_key, $tweets, TWITTER_PULL_CACHE_TABLE, time() + $cache_length);
+    }
+  }
+
+  return $tweets;
+}
+
+/**
+ * Automatically add links to URLs and Twitter usernames in a tweet.
+ */
+function twitter_pull_add_links($text) {
+  $pattern = '#http://(\S+)#ims';
+  $repl = '<a href="http://$1">$1</a>';
+  $text = preg_replace($pattern, $repl, $text);
+
+  $pattern = '#@(\w+)#ims';
+  $repl = '@<a href="http://twitter.com/$1">$1</a>';
+  $text = preg_replace($pattern, $repl, $text);
+
+  return $text;
+}
+
+/**
+ * Sample theme definitions that can be applied to tweets.
+ */
+function twitter_pull_theme() {
+  return array(
+    'twitter_pull_listing' => array(
+      'arguments' => array('tweets' => NULL, 'twitkey' => NULL, 'title' => NULL),
+      'template' => 'twitter-pull-listing',
+    ),
+  );
+}
+
+
+
+
+/****** FOR TESTING ONLY. KEEP DISABLED AT ALL TIMES UNLESS DEBUGGING ******/
+
+/*
+function twitter_pull_menu() {
+  $items = array();
+
+  $items['twitter/pull/test'] = array(
+    'title' => 'Twitter Pull Test',
+    'page callback' => 'twitter_pull_test',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function twitter_pull_test() {
+  return twitter_pull_render('@inadarei');
+}
+*/

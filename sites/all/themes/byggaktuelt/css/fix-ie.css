@@ -1,0 +1,28 @@
+@charset "utf-8";
+/* $Id: fix-ie.css,v 1.2 2010/10/05 09:03:03 pos Exp $*/
+/**
+ * Drupal 6 OpenPublish Theme - Created by Phase2 Technology
+ * For Internet Explorer 7 and under
+ */
+
+#header > div {
+    margin:0px;
+    padding:0px;
+    display:inline;
+
+ }
+.frontpage-small-ad > div > div > div {
+    display:inline;
+    margin-right:0;
+    padding-left:2px;
+}
+ #internal-wrapper {
+ 	background:none repeat scroll 0 0 #FFFFFF;
+	border-right: 1px solid #DBDBDB;
+	padding:2px;
+ 	float:left;
+ 	width:986px;
+ }
+ #wrapper {
+	width:1160px;
+}

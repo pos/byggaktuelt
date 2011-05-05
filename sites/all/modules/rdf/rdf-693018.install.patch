@@ -1,0 +1,18 @@
+--- rdf.install.orig	2010-01-22 17:52:16.000000000 -0500
++++ rdf.install	2010-01-22 18:00:19.000000000 -0500
+@@ -231,11 +231,10 @@ function rdf_schema_alter($schema) {
+   // schema is loaded at runtime; it's needed in order for RDF repositories
+   // created by third-party modules to have a schema without them having to
+   // duplicate the definition of the {rdf_data} table, above.
+-  if (function_exists('rdf_db_get_repository_tables')) {
+-    foreach (rdf_db_get_repository_tables() as $table) {
+-      if ($table != RDF_DB_TABLE_DEFAULT) {
+-        $schema[$table] = $schema[RDF_DB_TABLE_DEFAULT];
+-      }
++  module_load_include('inc', 'rdf', 'rdf.db');
++  foreach (rdf_db_get_repository_tables() as $table) {
++    if ($table != RDF_DB_TABLE_DEFAULT) {
++      $schema[$table] = $schema[RDF_DB_TABLE_DEFAULT];
+     }
+   }
+ }
