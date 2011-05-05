@@ -15,8 +15,7 @@ function buildcalculator_menu() {
     'access arguments' => array('access content'),
     'description' => t('buildcalculator'),
     'type' => MENU_CALLBACK,
-  );
- 
+  ); 
   return $items;
 }
 
