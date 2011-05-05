@@ -36,7 +36,7 @@
   <div id="wrapper"> 
   <div id="internal-wrapper">  
   <div id="header">
-    <?php // print $header; ?>
+    <?php print $header; ?>
     <div class="clear"></div>
   </div> <!-- /#header -->
   

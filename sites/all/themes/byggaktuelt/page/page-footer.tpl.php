@@ -15,7 +15,7 @@
    </div>   <!-- Internal wrapper -->
      <?php if ($ad): ?>
            <div  id="sidebar-ad"><div id="sidebar-ad-inner" class="region region-ad">
-              <?php //print $ad; ?>
+              <?php print $ad; ?>
           </div></div> <!-- /#sidebar-ad-inner, /#sidebar-ad -->
     <?php endif; ?>
     </div> <!-- /#wrapper -->
