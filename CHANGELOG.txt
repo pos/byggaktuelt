@@ -1,3 +1,5 @@
+NU ändrar jag lite i changelog filen också
+
 // $Id: CHANGELOG.txt,v 1.253.2.41 2010/08/11 20:35:47 goba Exp $
 
 Drupal 6.19, 2010-08-11
